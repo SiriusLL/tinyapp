@@ -1,11 +1,15 @@
 const { request } = require('express');
 const express = require('express');
-const morgan = require('morgan'); //if you want morgan,also need to 'npm i morgan in root folder
+const morgan = require('morgan'); //if you want morgan,also 
+const cookieParser = require("cookie-parser");
+// need to 'npm i morgan in root folder
 const app = express();
 app.use(morgan('dev')); //if you want morgan dev
 const bodyParser = require("body-parser");
+const { restart } = require('nodemon');
 app.use(bodyParser.urlencoded({extended: true}));
 const PORT = 8080; // default port 8080
+app.use(cookieParser())
 
 app.set('view engine', 'ejs');
 
@@ -77,7 +81,22 @@ app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
+//added login request checks if user exists, redirects to urls
+app.post("/login", (req, res) => {
+  
+  const username = req.body && req.body.username ? req.body.username : "";
+  res.cookie('userName', username)
+  res.redirect('/urls');
+  //if (username.length) {
+    //res.redirect(`/urls/${username}`)
+  // } else {
+  //   res.redirect('/urls')
+  // };
+  console.log(request.body.username);
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//req.cookies[userName]
