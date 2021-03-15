@@ -17,8 +17,13 @@
           <input class="btn btn-primary" type="submit" value="Login">
         </form>
         <% }; %>
-       <% if(username) { %>
-        <p>Logged in as <%= username %></p>
+       <!-- if user name exists than display username and logout button -->
+        <% if(username) { %>
+        <a class="navbar-brand">Logged in as: <%= username %></a>
+        <!-- logout button -->
+        <form method="POST" action="/logout" class="form-inline float:right">
+          <input class="btn btn-primary" type="submit" value="Logout">
+        </form>
         <% }; %>
       </div>
     </div>

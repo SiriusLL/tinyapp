@@ -33,14 +33,16 @@ app.get('/urls.json', (req, res) => {
 app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
-
+//main urls page
+//passes urls and username to ejs
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies.username };
   res.render('urls_index', templateVars);
 });
 //route to show the forum
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { username: req.cookies.username };
+  res.render('urls_new', templateVars);
 });
 //add new URL
 app.post('/urls', (req, res) => {
@@ -53,7 +55,7 @@ app.post('/urls', (req, res) => {
 })
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req };
   console.log(templateVars);
   res.render("urls_show", templateVars);
   //console.log(req.params);
@@ -108,6 +110,8 @@ app.post("/login", (req, res) => {
   // };
   console.log(req.body.username);
 })
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
