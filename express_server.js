@@ -1,6 +1,8 @@
 const { request } = require('express');
 const express = require('express');
+const morgan = require('morgan'); //if you want morgan,also need to 'npm i morgan in root folder
 const app = express();
+app.use(morgan('dev')); //if you want morgan dev
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const PORT = 8080; // default port 8080
@@ -52,7 +54,7 @@ app.get("/urls/:shortURL", (req, res) => {
   //console.log(req.params);
   //route shortURL to longURL page, found shortURL in param object
 });
-
+// redirect to the long URL
 app.get('/u/:shortURL', (req, res) => {
   longURL = urlDatabase[req.params.shortURL];
   console.log(longURL,'..........................................');
