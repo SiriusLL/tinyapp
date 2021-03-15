@@ -1,7 +1,6 @@
 const { request } = require('express');
 const express = require('express');
 const app = express();
-//body parser to parse body that is in post
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const PORT = 8080; // default port 8080
@@ -33,11 +32,11 @@ app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
-
+//route to show the forum
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
-//add new URL, must be above /urls/:shortURL because its higher in file system
+//add new URL
 app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
@@ -52,6 +51,12 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
   //console.log(req.params);
   //route shortURL to longURL page, found shortURL in param object
+});
+
+app.get('/u/:shortURL', (req, res) => {
+  longURL = urlDatabase[req.params.shortURL];
+  console.log(longURL,'..........................................');
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
