@@ -23,10 +23,12 @@
         </tr>
       </thead>
       <tbody>
+        <p>LOOK HERE</p><%= username %></p>
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
             <td><%= urls[url] %></td>
+           <!-- added edit column with edit button -->
             <td>
               <form method="GET" action="/urls/<%= url %>">
               <input class="btn btn-outline-primary" type="submit" value="Edit"/>

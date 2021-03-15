@@ -35,7 +35,7 @@ app.get('/hello', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies.username };
   res.render('urls_index', templateVars);
 });
 //route to show the forum
@@ -81,18 +81,32 @@ app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
+
+// app.get("/login", (req, res) => {
+//   const templateVars = {
+//     username: req.cookies["username"]
+//   };
+//   res.render('urls_index', templateVars);
+
+// })
+
 //added login request checks if user exists, redirects to urls
 app.post("/login", (req, res) => {
   
   const username = req.body && req.body.username ? req.body.username : "";
-  res.cookie('userName', username)
+  res.cookie('username', username)
   res.redirect('/urls');
+  
+  
+  
+  //
+  
   //if (username.length) {
     //res.redirect(`/urls/${username}`)
   // } else {
   //   res.redirect('/urls')
   // };
-  console.log(request.body.username);
+  console.log(req.body.username);
 })
 
 app.listen(PORT, () => {
