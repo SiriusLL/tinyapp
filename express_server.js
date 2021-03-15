@@ -50,6 +50,7 @@ app.post('/urls', (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  console.log(templateVars);
   res.render("urls_show", templateVars);
   //console.log(req.params);
   //route shortURL to longURL page, found shortURL in param object
@@ -64,9 +65,17 @@ app.get('/u/:shortURL', (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   console.log('key', req.params)
   //req.params.shortURL
-  const id = req.params.shortURL;
-  delete urlDatabase[id];
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
   res.redirect('/urls');
+});
+// edit the long url
+app.post("/urls/:shortURL", (req, res) => {
+  console.log('req',req.body);
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.listen(PORT, () => {
