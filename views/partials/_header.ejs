@@ -19,10 +19,10 @@
         <% }; %>
        <!-- if user name exists than display username and logout button -->
         <% if(username) { %>
-        <a class="navbar-brand">Logged in as: <%= username %></a>
+        <a class="navbar-brand pull-right">Logged in as: <%= username %></a>
         <!-- logout button -->
-        <form method="POST" action="/logout" class="form-inline float:right">
-          <input class="btn btn-primary" type="submit" value="Logout">
+        <form method="POST" action="/logout" class="form-inline pull-right">
+          <input class="btn btn-outline-dark" type="submit" value="Logout">
         </form>
         <% }; %>
       </div>
