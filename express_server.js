@@ -28,6 +28,7 @@ const users = {
 };
 
 const userLookup = (email) => {
+  //console.log(email in users);
   return (email in users);
 };
 
@@ -143,10 +144,11 @@ app.post("/register", (req, res) => {           //
   
   users[newId] = { id: newId, email: email, password: password };
   //error status code 400
+  console.log('wht is this-->', userLookup(email));
   if(!req.body.email.length || !req.body.password.length) {
     res.statusCode = 400;
     res.send('Please pick a username');
-  } else if (!userLookup(email)) {
+  } else if (userLookup(email)) {
     res.statusCode = 400
     res.send('This email has already been used')
   } else {
