@@ -54,6 +54,16 @@ const findUserById = (users, id) => {
   }
   return false;
 }
+
+const urlsForUser = (id) => {
+  const userUrls = {};
+  for (const url in urlDatabase) {
+    if (id === urlDatabase[url].userID) {
+      userUrls[url] = urlDatabase[url];
+    }
+  }
+  return userUrls;
+};
 // const authenticateUser = (users, email, password) => {
 //  //this function is finding users email;
 //   const userFound = findUserByEmail(users, email);
@@ -83,7 +93,9 @@ app.get('/hello', (req, res) => {
 //main urls page
 //passes urls and username to ejs
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase, username: users[req.cookies.user_id] };
+  const cookie = req.cookies.user_id;
+  const userUrls = urlsForUser(cookie);
+  const templateVars = { urls: userUrls, username: users[req.cookies.user_id] };
   // console.log('users',users);
   // console.log('cookies',req.cookies.user_id);
   // console.log('all of the things', users[req.cookies.user_id])
@@ -149,6 +161,14 @@ app.get('/u/:shortURL', (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   // console.log('key', req.params)
   //req.params.shortURL
+  const cookie = req.cookies.user_id;
+  const user = findUserById(users, cookie);
+  
+  if (!user) {
+    res.statusCode = 403;
+    res.send('please sign in to access');
+    return;
+  }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -156,6 +176,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // edit the long url
 app.post("/urls/:shortURL", (req, res) => {
   // console.log('req',req.body);
+  const cookie = req.cookies.user_id;
+  const user = findUserById(users, cookie);
+  
+  if (!user) {
+    res.statusCode = 403;
+    res.send('please sign in to access');
+    return;
+  }
+
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   urlDatabase[shortURL].longURL = longURL;
