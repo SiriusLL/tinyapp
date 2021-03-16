@@ -39,16 +39,16 @@ const findUserByEmail = (users, email) => {
   }
   return false;
 }
-const authenticateUser = (users, email, password) => {
- //this function is finding users email;
-  const userFound = findUserByEmail(users, email);
+// const authenticateUser = (users, email, password) => {
+//  //this function is finding users email;
+//   const userFound = findUserByEmail(users, email);
   
-  if(userFound && userFound.password === password) {
-    return userFound
-  }
+//   if(userFound && userFound.password === password) {
+//     return userFound
+//   }
   
-  return false;
-}
+//   return false;
+// }
 
 const generateRandomString = () => {
 return Math.random().toString(36).substring(2, 8)
@@ -145,11 +145,15 @@ app.post("/login", (req, res) => {
   //const username = req.body && req.body.username ? req.body.username : "";
   const user = findUserByEmail(users, email);
   if (!user) {
-    res.redirect('/login');
+    // res.redirect('/login');
+    res.statusCode = 403;
+    res.send('Incorrect login info, please try again');
     return;
   }
   if (user.password !== password) {
-    res.redirect('/login');
+    //res.redirect('/login');
+    res.statusCode = 403;
+    res.send('Incorrect login info, please try again')
     return;
   }
   
@@ -190,7 +194,7 @@ app.post("/register", (req, res) => {           //
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
