@@ -39,6 +39,16 @@ const findUserByEmail = (users, email) => {
   }
   return false;
 }
+
+const findUserById = (users, id) => {
+  for (let userId in users) {
+    if (users[userId].id === id) {
+      
+      return users[userId].id;
+    }
+  }
+  return false;
+}
 // const authenticateUser = (users, email, password) => {
 //  //this function is finding users email;
 //   const userFound = findUserByEmail(users, email);
@@ -80,7 +90,18 @@ app.get('/urls', (req, res) => {
 //route to show the forum
 app.get('/urls/new', (req, res) => {
   const templateVars = { username: users[req.cookies.user_id] };
-  console.log(req.cookies);
+  const cookie = req.cookies.user_id;
+  console.log('cookie-->', cookie);
+  const user = findUserById(users, cookie);
+  console.log(!user);
+  if (!user) {
+    res.redirect('/login');
+    return;
+  }
+  console.log('request cookie', cookie);
+  
+  //console.log('users-->', users);
+  
   res.render('urls_new', templateVars);
 });
 //add new URL
@@ -90,13 +111,13 @@ app.post('/urls', (req, res) => {
   //console.log(shortURL);
   urlDatabase[shortURL] = longURL
   res.redirect(`/urls/${shortURL}`);
-  console.log(urlDatabase);
+  //console.log(urlDatabase);
 })
 //added username to templateVars in all res.render requests
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: users[req.cookies.user_id] };
-  console.log(templateVars);
-  console.log(req.cookies);
+  //console.log(templateVars);
+  //console.log(req.cookies);
   res.render("urls_show", templateVars);
   //console.log(req.params);
   //route shortURL to longURL page, found shortURL in param object
@@ -104,12 +125,12 @@ app.get("/urls/:shortURL", (req, res) => {
 // redirect to the long URL
 app.get('/u/:shortURL', (req, res) => {
   longURL = urlDatabase[req.params.shortURL];
-  console.log(longURL,'..........................................');
+  // console.log(longURL,'..........................................');
   res.redirect(longURL);
 });
 //post to delet short url, req.params.shortURL is the key for the short url
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log('key', req.params)
+  // console.log('key', req.params)
   //req.params.shortURL
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -117,7 +138,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 // edit the long url
 app.post("/urls/:shortURL", (req, res) => {
-  console.log('req',req.body);
+  // console.log('req',req.body);
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
@@ -139,7 +160,7 @@ app.get("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  console.log('login req,body:', req.body);
+  // console.log('login req,body:', req.body);
   // const emailLogin = req.body.email;
   // const passwordLogin = req.body.password;
   //const username = req.body && req.body.username ? req.body.username : "";
@@ -186,9 +207,9 @@ app.post("/register", (req, res) => {           //
   } else {
     users[newId] = { id: newId, email: email, password: password };
     res.cookie('user_id', newId);
-    console.log(users);
-    console.log('this length-->', req.body.email.length)
-    console.log('this is it---email------->', email);
+    // console.log(users);
+    // console.log('this length-->', req.body.email.length)
+    // console.log('this is it---email------->', email);
     res.redirect('/urls');
   };
 });
