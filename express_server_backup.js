@@ -27,10 +27,6 @@ const users = {
   }
 };
 
-const userLookup = (email) => {
-  return (email in users);
-};
-
 const generateRandomString = () => {
 return Math.random().toString(36).substring(2, 8)
 };
@@ -49,18 +45,12 @@ app.get('/hello', (req, res) => {
 //main urls page
 //passes urls and username to ejs
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase, username: users[req.cookies.user_id] };
-  console.log('users',users);
-  console.log('cookies',req.cookies.user_id);
-  console.log('all of the things', users[req.cookies.user_id])
-  console.log('templateVars', templateVars)
-  console.log('username', templateVars.username.email);
+  const templateVars = { urls: urlDatabase, username: req.cookies.username };
   res.render('urls_index', templateVars);
 });
 //route to show the forum
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: users[req.cookies.user_id] };
-  console.log(req.cookies);
+  const templateVars = { username: req.cookies.username };
   res.render('urls_new', templateVars);
 });
 //add new URL
@@ -72,11 +62,10 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
   console.log(urlDatabase);
 })
-//added username to templateVars in all res.render requests
+
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: users[req.cookies.user_id] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req };
   console.log(templateVars);
-  console.log(req.cookies);
   res.render("urls_show", templateVars);
   //console.log(req.params);
   //route shortURL to longURL page, found shortURL in param object
@@ -118,7 +107,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
 
   res.render('register');
-});
+})
 
 app.post("/login", (req, res) => {
   
@@ -132,7 +121,7 @@ app.post("/login", (req, res) => {
   //   res.redirect('/urls')
   // };
   //console.log(req.body.username);
-});
+})
 
 //takes input of user registration, generage new user id and add it and email pass to user object, set cookie and redirect to /urls
 app.post("/register", (req, res) => {           //
@@ -142,26 +131,15 @@ app.post("/register", (req, res) => {           //
   const { email, password } = req.body;
   
   users[newId] = { id: newId, email: email, password: password };
-  //error status code 400
-  if(!req.body.email.length || !req.body.password.length) {
-    res.statusCode = 400;
-    res.send('Please pick a username');
-  } else if (!userLookup(email)) {
-    res.statusCode = 400
-    res.send('This email has already been used')
-  } else {
   res.cookie('user_id', newId);
   console.log(users);
-  console.log('this-->', req.body.email.length)
-  console.log('this is it---------->', email);
   res.redirect('/urls');
-  };
-});
+})
 
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
-});
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

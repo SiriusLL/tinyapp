@@ -10,7 +10,7 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         
-        <% if(!username) { %>
+        <% if(!username.email) { %>
         <!-- user login form with button -->
         <form method="POST" action="/login" class="form-inline float:right">
           <input class="form-control" type="text" placeholder="Enter Username" name="username">
@@ -18,8 +18,8 @@
         </form>
         <% }; %>
        <!-- if user name exists than display username and logout button -->
-        <% if(username) { %>
-        <a class="navbar-brand pull-right">Logged in as: <%= username %></a>
+        <% if(username.email) { %>
+        <a class="navbar-brand pull-right">Logged in as: <%= username['email'] %></a>
         <!-- logout button -->
         <form method="POST" action="/logout" class="form-inline pull-right">
           <input class="btn btn-outline-dark" type="submit" value="Logout">
