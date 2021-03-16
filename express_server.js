@@ -18,19 +18,37 @@ const urlDatabase = {
   '9sm5xk': 'http://www.google.com'
 };
 
-//database object for users
 const users = {
   "userRandomID": {
     id: "userRandomeID",
-    email: "user@examle.com",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   }
 };
+// database object for users
+// const userLookup = (email) => {
+//   //console.log(email in users);
+//   return (email in users);
+// };
 
-const userLookup = (email) => {
-  //console.log(email in users);
-  return (email in users);
-};
+const findUserByEmail = (users, email) => {
+  for(let userId in users) {
+    if (users[userId].email === email) {
+      return users[userId];
+    } 
+  }
+  return false;
+}
+const authenticateUser = (users, email, password) => {
+ //this function is finding users email;
+  const userFound = findUserByEmail(users, email);
+  
+  if(userFound && userFound.password === password) {
+    return userFound
+  }
+  
+  return false;
+}
 
 const generateRandomString = () => {
 return Math.random().toString(36).substring(2, 8)
@@ -51,12 +69,13 @@ app.get('/hello', (req, res) => {
 //passes urls and username to ejs
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase, username: users[req.cookies.user_id] };
-  console.log('users',users);
-  console.log('cookies',req.cookies.user_id);
-  console.log('all of the things', users[req.cookies.user_id])
-  console.log('templateVars', templateVars)
-  console.log('username', templateVars.username.email);
+  // console.log('users',users);
+  // console.log('cookies',req.cookies.user_id);
+  // console.log('all of the things', users[req.cookies.user_id])
+  // console.log('templateVars', templateVars)
+  // console.log('username', templateVars.username.email);
   res.render('urls_index', templateVars);
+  
 });
 //route to show the forum
 app.get('/urls/new', (req, res) => {
@@ -105,13 +124,10 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// app.get("/login", (req, res) => {
-//   const templateVars = {
-//     username: req.cookies["username"]
-//   };
-//   res.render('urls_index', templateVars);
-
-// })
+app.get("/login", (req, res) => {
+  
+  res.render('login');
+})
 
 //added login request checks if user exists, redirects to urls
 
@@ -122,9 +138,22 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  console.log('login req,body:', req.body);
+  // const emailLogin = req.body.email;
+  // const passwordLogin = req.body.password;
+  //const username = req.body && req.body.username ? req.body.username : "";
+  const user = findUserByEmail(users, email);
+  if (!user) {
+    res.redirect('/login');
+    return;
+  }
+  if (user.password !== password) {
+    res.redirect('/login');
+    return;
+  }
   
-  const username = req.body && req.body.username ? req.body.username : "";
-  res.cookie('username', username);
+  res.cookie('user_id', user.id);
   res.redirect('/urls');
   
   //if (username.length) {
@@ -142,21 +171,21 @@ app.post("/register", (req, res) => {           //
   const newId = generateRandomString();
   const { email, password } = req.body;
   
-  users[newId] = { id: newId, email: email, password: password };
   //error status code 400
-  console.log('wht is this-->', userLookup(email));
+  console.log('wht is this-->', findUserByEmail(users,email));
   if(!req.body.email.length || !req.body.password.length) {
     res.statusCode = 400;
     res.send('Please pick a username');
-  } else if (userLookup(email)) {
+  } else if (findUserByEmail(users, email)) {
     res.statusCode = 400
     res.send('This email has already been used')
   } else {
-  res.cookie('user_id', newId);
-  console.log(users);
-  console.log('this-->', req.body.email.length)
-  console.log('this is it---------->', email);
-  res.redirect('/urls');
+    users[newId] = { id: newId, email: email, password: password };
+    res.cookie('user_id', newId);
+    console.log(users);
+    console.log('this length-->', req.body.email.length)
+    console.log('this is it---email------->', email);
+    res.redirect('/urls');
   };
 });
 

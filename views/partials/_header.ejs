@@ -10,15 +10,17 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         
-        <% if(!username.email) { %>
+        <% if(!username) { %>
         <!-- user login form with button -->
-        <form method="POST" action="/login" class="form-inline float:right">
+        <!-- <form method="POST" action="/login" class="form-inline float:right">
           <input class="form-control" type="text" placeholder="Enter Username" name="username">
           <input class="btn btn-primary" type="submit" value="Login">
-        </form>
-        <% }; %>
+        </form> -->
+        <!-- removed login form and replaced with register and login link  -->
+        <a class="nav-item nav-link" href="/register">New User Register</a>
+        <a class="nav-item nav-link" href="/login">Login</a>
+        <% } else { %>
        <!-- if user name exists than display username and logout button -->
-        <% if(username.email) { %>
         <a class="navbar-brand pull-right">Logged in as: <%= username['email'] %></a>
         <!-- logout button -->
         <form method="POST" action="/logout" class="form-inline pull-right">
