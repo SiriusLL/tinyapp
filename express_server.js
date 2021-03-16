@@ -93,22 +93,37 @@ app.post("/urls/:shortURL", (req, res) => {
 // })
 
 //added login request checks if user exists, redirects to urls
+
+//renders register page
+app.get("/register", (req, res) => {
+
+  res.render('register');
+})
+
 app.post("/login", (req, res) => {
   
   const username = req.body && req.body.username ? req.body.username : "";
   res.cookie('username', username);
   res.redirect('/urls');
   
-  
-  
-  //
-  
   //if (username.length) {
     //res.redirect(`/urls/${username}`)
   // } else {
   //   res.redirect('/urls')
   // };
-  console.log(req.body.username);
+  //console.log(req.body.username);
+})
+
+//takes input of user registration
+app.post("/register", (req, res) => {           //---working here wednesday
+  console.log("register req.body", req.body.email)
+  console.log("cookie", req);
+  const newUser = req.body.email;
+  const newPassword = req.body.password;
+
+  users[newName] = newPassword;
+
+  
 })
 
 app.post("/logout", (req, res) => {
