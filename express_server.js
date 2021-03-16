@@ -18,9 +18,18 @@ const urlDatabase = {
   '9sm5xk': 'http://www.google.com'
 };
 
+//database object for users
+const users = {
+  "userRandomID": {
+    id: "userRandomeID",
+    email: "user@examle.com",
+    password: "purple-monkey-dinosaur"
+  }
+};
+
 const generateRandomString = () => {
 return Math.random().toString(36).substring(2, 8)
-}
+};
 
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -114,16 +123,17 @@ app.post("/login", (req, res) => {
   //console.log(req.body.username);
 })
 
-//takes input of user registration
-app.post("/register", (req, res) => {           //---working here wednesday
-  console.log("register req.body", req.body.email)
-  console.log("cookie", req);
-  const newUser = req.body.email;
-  const newPassword = req.body.password;
-
-  users[newName] = newPassword;
-
+//takes input of user registration, generage new user id and add it and email pass to user object, set cookie and redirect to /urls
+app.post("/register", (req, res) => {           //
+  //console.log("register req.body", req.body);
+  //console.log("cookie", req);
+  const newId = generateRandomString();
+  const { email, password } = req.body;
   
+  users[newId] = { id: newId, email: email, password: password };
+  res.cookie('user_id', newId);
+  console.log(users);
+  res.redirect('/urls');
 })
 
 app.post("/logout", (req, res) => {
