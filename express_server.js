@@ -13,9 +13,14 @@ app.use(cookieParser())
 
 app.set('view engine', 'ejs');
 
+// const urlDatabase = {
+//   'b2xVn2': 'http://www.lighthouselabs.ca',
+//   '9sm5xk': 'http://www.google.com'
+// };
+
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xk': 'http://www.google.com'
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const users = {
@@ -39,7 +44,7 @@ const findUserByEmail = (users, email) => {
   }
   return false;
 }
-
+// finds user id and returns user id or false;
 const findUserById = (users, id) => {
   for (let userId in users) {
     if (users[userId].id === id) {
@@ -88,19 +93,16 @@ app.get('/urls', (req, res) => {
   
 });
 //route to show the forum
+//modified to only let login users access creat new url
 app.get('/urls/new', (req, res) => {
   const templateVars = { username: users[req.cookies.user_id] };
   const cookie = req.cookies.user_id;
-  console.log('cookie-->', cookie);
   const user = findUserById(users, cookie);
-  console.log(!user);
+
   if (!user) {
     res.redirect('/login');
     return;
   }
-  console.log('request cookie', cookie);
-  
-  //console.log('users-->', users);
   
   res.render('urls_new', templateVars);
 });
@@ -108,8 +110,10 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
-  //console.log(shortURL);
-  urlDatabase[shortURL] = longURL
+  const id = req.cookies.user_id;
+  console.log(longURL);
+  urlDatabase[shortURL] = { longURL: longURL, userID: id };
+  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
   //console.log(urlDatabase);
 })
@@ -160,19 +164,14 @@ app.get("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  // console.log('login req,body:', req.body);
-  // const emailLogin = req.body.email;
-  // const passwordLogin = req.body.password;
   //const username = req.body && req.body.username ? req.body.username : "";
   const user = findUserByEmail(users, email);
   if (!user) {
-    // res.redirect('/login');
     res.statusCode = 403;
     res.send('Incorrect login info, please try again');
     return;
   }
   if (user.password !== password) {
-    //res.redirect('/login');
     res.statusCode = 403;
     res.send('Incorrect login info, please try again')
     return;
@@ -190,9 +189,7 @@ app.post("/login", (req, res) => {
 });
 
 //takes input of user registration, generage new user id and add it and email pass to user object, set cookie and redirect to /urls
-app.post("/register", (req, res) => {           //
-  //console.log("register req.body", req.body);
-  //console.log("cookie", req);
+app.post("/register", (req, res) => {
   const newId = generateRandomString();
   const { email, password } = req.body;
   
@@ -207,9 +204,6 @@ app.post("/register", (req, res) => {           //
   } else {
     users[newId] = { id: newId, email: email, password: password };
     res.cookie('user_id', newId);
-    // console.log(users);
-    // console.log('this length-->', req.body.email.length)
-    // console.log('this is it---email------->', email);
     res.redirect('/urls');
   };
 });
@@ -223,4 +217,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-//req.cookies[userName]
