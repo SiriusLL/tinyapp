@@ -111,16 +111,29 @@ app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   const id = req.cookies.user_id;
-  console.log(longURL);
+  const user = findUserById(users, id)
+  if (!user) {
+    res.statusCode = 400;
+    res.send('please sign in to access');
+    return;
+  }
   urlDatabase[shortURL] = { longURL: longURL, userID: id };
-  console.log(urlDatabase);
+  
   res.redirect(`/urls/${shortURL}`);
   //console.log(urlDatabase);
 })
-//added username to templateVars in all res.render requests
+//added username to templateVars in all res.render requests------finished to here>>---------------------------------
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: users[req.cookies.user_id] };
-  //console.log(templateVars);
+  const cookie = req.cookies.user_id;
+  const user = findUserById(users, cookie);
+  
+  if (!user) {
+    res.statusCode = 403;
+    res.send('please sign in to access');
+    return;
+  }
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: users[req.cookies.user_id] };
+  console.log(templateVars);
   //console.log(req.cookies);
   res.render("urls_show", templateVars);
   //console.log(req.params);
@@ -128,8 +141,8 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 // redirect to the long URL
 app.get('/u/:shortURL', (req, res) => {
-  longURL = urlDatabase[req.params.shortURL];
-  // console.log(longURL,'..........................................');
+  longURL = urlDatabase[req.params.shortURL].longURL;
+   console.log(req.params,'..........................................');
   res.redirect(longURL);
 });
 //post to delet short url, req.params.shortURL is the key for the short url
@@ -145,7 +158,7 @@ app.post("/urls/:shortURL", (req, res) => {
   // console.log('req',req.body);
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
