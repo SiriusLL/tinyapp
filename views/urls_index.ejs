@@ -23,7 +23,9 @@
         </tr>
       </thead>
       <tbody>
-        
+        <% if(!loginCheck) { %>
+          <h3>Please login to view URL's</h3>
+        <% } else { %>
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
@@ -42,7 +44,7 @@
             </td>
           </tr>
             
-            
+        <% } %>  
         <% } %>
       </tbody>
     </table>

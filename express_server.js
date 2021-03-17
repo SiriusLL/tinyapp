@@ -32,42 +32,37 @@ const users = {
     password: "purple-monkey-dinosaur"
   }
 };
-
+console.log('---------->',findUserByEmail('user@example.com', users));
 app.get('/', (req, res) => {
   const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
   
   if (!user) {
     res.statusCode = 403;
-    //res.send('please sign in to access');
     res.redirect('/login');
     return;
-  }
+  };
 
-  res.redirect('/urls')
-  res.send('Hello!');
+  res.redirect('/urls');
 });
 
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
-});
 //main urls page
 //passes urls and username to ejs
 app.get('/urls', (req, res) => {
   const cookie = req.session.user_id;
   const userUrls = urlsForUser(cookie, urlDatabase);
-  const templateVars = { urls: userUrls, username: users[req.session.user_id] };
   const user = findUserById(users, cookie);
+  const templateVars = { urls: userUrls, username: users[req.session.user_id], loginCheck: user };
   
-  if (!user) {
-    res.statusCode = 400;
-    res.send('please sign in to access');
-    return;
-  };
+  // if (!user) {
+  //   res.statusCode = 400;
+  //   res.send('please sign in to access');
+  //   return;
+  // };
 
   res.render('urls_index', templateVars);
 });
@@ -181,7 +176,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/login", (req, res) => {
   const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
-  
+  console.log(user, '***************');
   if (!user) {
     res.render('login');
     return;
@@ -204,18 +199,18 @@ app.get("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = findUserByEmail(users, email);
-  
+  console.log(user,'<<<<');
   if (!user) {
     res.statusCode = 403;
     res.send('Incorrect login info, please try again');
     return;
   };
 
-bcrypt.compare(password, user.password)
+bcrypt.compare(password, users[user].password)
   .then((result) => {
     
     if (result) {
-      req.session.user_id = user.id;
+      req.session.user_id = user;
       res.redirect('/urls');
     } else {
       res.statusCode = 403;
