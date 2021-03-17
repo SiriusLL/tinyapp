@@ -1,6 +1,7 @@
 const { request } = require('express');
 const express = require('express');
-const morgan = require('morgan'); //if you want morgan,also  
+const morgan = require('morgan'); //if you want morgan,also 
+const { findUserByEmail, findUserById, urlsForUser, generateRandomString } = require('./helpers')
 //const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
@@ -19,11 +20,6 @@ app.use(cookieSession({
 
 app.set('view engine', 'ejs');
 
-// const urlDatabase = {
-//   'b2xVn2': 'http://www.lighthouselabs.ca',
-//   '9sm5xk': 'http://www.google.com'
-// };
-
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -35,54 +31,6 @@ const users = {
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   }
-};
-// database object for users
-// const userLookup = (email) => {
-//   //console.log(email in users);
-//   return (email in users);
-// };
-
-const findUserByEmail = (users, email) => {
-  for(let userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
-    } 
-  }
-  return false;
-}
-// finds user id and returns user id or false;
-const findUserById = (users, id) => {
-  for (let userId in users) {
-    if (users[userId].id === id) {
-      
-      return users[userId].id;
-    }
-  }
-  return false;
-}
-
-const urlsForUser = (id) => {
-  const userUrls = {};
-  for (const url in urlDatabase) {
-    if (id === urlDatabase[url].userID) {
-      userUrls[url] = urlDatabase[url];
-    }
-  }
-  return userUrls;
-};
-// const authenticateUser = (users, email, password) => {
-//  //this function is finding users email;
-//   const userFound = findUserByEmail(users, email);
-  
-//   if(userFound && userFound.password === password) {
-//     return userFound
-//   }
-  
-//   return false;
-// }
-
-const generateRandomString = () => {
-return Math.random().toString(36).substring(2, 8)
 };
 
 app.get('/', (req, res) => {
@@ -100,7 +48,7 @@ app.get('/hello', (req, res) => {
 //passes urls and username to ejs
 app.get('/urls', (req, res) => {
   const cookie = req.session.user_id;
-  const userUrls = urlsForUser(cookie);
+  const userUrls = urlsForUser(cookie, urlDatabase);
   const templateVars = { urls: userUrls, username: users[req.session.user_id] };
   // console.log('users',users);
   // console.log('cookies',req.cookies.user_id);
