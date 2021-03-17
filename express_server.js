@@ -5,7 +5,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const bodyParser = require("body-parser");
 const { restart } = require('nodemon');
-const { findUserByEmail, findUserById, urlsForUser, generateRandomString } = require('./helpers')
+const { findUserByEmail, findUserById, urlsForUser, generateRandomString } = require('./helpers');
 const app = express();
 const PORT = 8080;
 
@@ -13,8 +13,8 @@ const PORT = 8080;
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
- name: 'session',
- keys: ['theDark', 'theLight'] 
+  name: 'session',
+  keys: ['theDark', 'theLight']
 }));
 
 
@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
     res.statusCode = 403;
     res.redirect('/login');
     return;
-  };
+  }
 
   res.redirect('/urls');
 });
@@ -77,7 +77,7 @@ app.get('/urls/new', (req, res) => {
   if (!user) {
     res.redirect('/login');
     return;
-  };
+  }
   
   res.render('urls_new', templateVars);
 });
@@ -87,19 +87,19 @@ app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   const id = req.session.user_id;
-  const user = findUserById(users, id)
+  const user = findUserById(users, id);
   
   if (!user) {
     res.statusCode = 400;
     res.send('please sign in to access');
     return;
-  };
+  }
 
   urlDatabase[shortURL] = { longURL: longURL, userID: id };
   res.redirect(`/urls/${shortURL}`);
 });
 
-//added username to templateVars in all res.render 
+//added username to templateVars in all res.render
 app.get("/urls/:shortURL", (req, res) => {
   const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
@@ -108,14 +108,14 @@ app.get("/urls/:shortURL", (req, res) => {
     res.statusCode = 403;
     res.send('please sign in to access');
     return;
-  };
+  }
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: users[req.session.user_id] };
   
   if (cookie !== urlDatabase[req.params.shortURL].userID) {
     res.statusCode = 404;
-    res.send('requested resource was not found')
+    res.send('requested resource was not found');
     return;
-  };
+  }
  
   res.render("urls_show", templateVars);
 });
@@ -128,15 +128,15 @@ app.get('/u/:shortURL', (req, res) => {
     res.statusCode = 403;
     res.send('please sign in to access');
     return;
-  };
+  }
 
   if (cookie !== urlDatabase[req.params.shortURL].userID) {
     res.statusCode = 404;
-    res.send('requested resource was not found')
+    res.send('requested resource was not found');
     return;
-  };
-  
-  longURL = urlDatabase[req.params.shortURL].longURL;
+  }
+
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -149,7 +149,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     res.statusCode = 403;
     res.send('please sign in to access');
     return;
-  };
+  }
 
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -165,7 +165,7 @@ app.post("/urls/:shortURL", (req, res) => {
     res.statusCode = 403;
     res.send('please sign in to access');
     return;
-  };
+  }
 
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
@@ -176,11 +176,11 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/login", (req, res) => {
   const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
-  console.log(user, '***************');
+
   if (!user) {
     res.render('login');
     return;
-  };
+  }
   res.redirect('/urls');
 });
 
@@ -192,7 +192,7 @@ app.get("/register", (req, res) => {
   if (!user) {
     res.render('register');
     return;
-  };
+  }
   res.redirect('/urls');
 });
 
@@ -204,20 +204,20 @@ app.post("/login", (req, res) => {
     res.statusCode = 403;
     res.send('Incorrect login info, please try again');
     return;
-  };
+  }
 
-bcrypt.compare(password, users[user].password)
-  .then((result) => {
-    
-    if (result) {
-      req.session.user_id = user;
-      res.redirect('/urls');
-    } else {
-      res.statusCode = 403;
-      res.send('Incorrect login info, please try again')
-      return;
-    };
-  });
+  bcrypt.compare(password, users[user].password)
+    .then((result) => {
+      
+      if (result) {
+        req.session.user_id = user;
+        res.redirect('/urls');
+      } else {
+        res.statusCode = 403;
+        res.send('Incorrect login info, please try again');
+        return;
+      }
+    });
 });
 
 //takes input of user registration, generage new user id and add it and email pass to user object, set cookie and redirect to /urls
@@ -225,35 +225,35 @@ app.post("/register", (req, res) => {
   const newId = generateRandomString();
   const { email, password } = req.body;
   
-  if(!req.body.email.length) {
+  if (!req.body.email.length) {
     res.statusCode = 400;
     res.send('Email field can not be blank');
     return;
   }
-  if(!req.body.password.length) {
+  if (!req.body.password.length) {
     res.statusCode = 400;
-    res.send('Password field can not be blank')
+    res.send('Password field can not be blank');
     return;
   }
   if (findUserByEmail(users, email)) {
-    res.statusCode = 400
-    res.send('This email has already been used')
+    res.statusCode = 400;
+    res.send('This email has already been used');
     return;
-  };
+  }
     
-bcrypt.genSalt(10)
-  .then((salt) => {
-    return bcrypt.hash(password, salt);
-  })
-  .then((hash) => {
-    users[newId] = { id: newId, 
-    email: email, 
-    password: hash
-    };
-    
-    req.session.user_id = users[newId].id;
-    res.redirect('/urls');
-  });
+  bcrypt.genSalt(10)
+    .then((salt) => {
+      return bcrypt.hash(password, salt);
+    })
+    .then((hash) => {
+      users[newId] = { id: newId,
+        email: email,
+        password: hash
+      };
+      
+      req.session.user_id = users[newId].id;
+      res.redirect('/urls');
+    });
 });
 
 app.post("/logout", (req, res) => {
