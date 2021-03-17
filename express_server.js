@@ -1,7 +1,8 @@
 const { request } = require('express');
 const express = require('express');
-const morgan = require('morgan'); //if you want morgan,also 
-const cookieParser = require("cookie-parser");
+const morgan = require('morgan'); //if you want morgan,also  
+//const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 // need to 'npm i morgan in root folder
 const app = express();
@@ -10,7 +11,11 @@ const bodyParser = require("body-parser");
 const { restart } = require('nodemon');
 app.use(bodyParser.urlencoded({extended: true}));
 const PORT = 8080; // default port 8080
-app.use(cookieParser())
+//app.use(cookieParser())
+app.use(cookieSession({
+ name: 'session',
+ keys: ['theDark', 'theLight'] 
+}));
 
 app.set('view engine', 'ejs');
 
@@ -94,9 +99,9 @@ app.get('/hello', (req, res) => {
 //main urls page
 //passes urls and username to ejs
 app.get('/urls', (req, res) => {
-  const cookie = req.cookies.user_id;
+  const cookie = req.session.user_id;
   const userUrls = urlsForUser(cookie);
-  const templateVars = { urls: userUrls, username: users[req.cookies.user_id] };
+  const templateVars = { urls: userUrls, username: users[req.session.user_id] };
   // console.log('users',users);
   // console.log('cookies',req.cookies.user_id);
   // console.log('all of the things', users[req.cookies.user_id])
@@ -108,10 +113,10 @@ app.get('/urls', (req, res) => {
 //route to show the forum
 //modified to only let login users access creat new url
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: users[req.cookies.user_id] };
-  const cookie = req.cookies.user_id;
+  const templateVars = { username: users[req.session.user_id] };
+  const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
-
+  console.log('----------><',user, '------;',cookie);
   if (!user) {
     res.redirect('/login');
     return;
@@ -120,11 +125,12 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 //add new URL
-app.post('/urls', (req, res) => {
+app.post('/urls', (req, res) => { //++++++++++++++++++++++
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;//req.cookies.user_id;
   const user = findUserById(users, id)
+  console.log('------->', user, 'id', id);
   if (!user) {
     res.statusCode = 400;
     res.send('please sign in to access');
@@ -137,7 +143,7 @@ app.post('/urls', (req, res) => {
 })
 //added username to templateVars in all res.render requests------finished to here>>---------------------------------
 app.get("/urls/:shortURL", (req, res) => {
-  const cookie = req.cookies.user_id;
+  const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
   
   if (!user) {
@@ -145,7 +151,7 @@ app.get("/urls/:shortURL", (req, res) => {
     res.send('please sign in to access');
     return;
   }
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: users[req.cookies.user_id] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: users[req.session.user_id] };
   console.log(templateVars);
   //console.log(req.cookies);
   res.render("urls_show", templateVars);
@@ -162,7 +168,7 @@ app.get('/u/:shortURL', (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   // console.log('key', req.params)
   //req.params.shortURL
-  const cookie = req.cookies.user_id;
+  const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
   
   if (!user) {
@@ -177,7 +183,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // edit the long url
 app.post("/urls/:shortURL", (req, res) => {
   // console.log('req',req.body);
-  const cookie = req.cookies.user_id;
+  const cookie = req.session.user_id;
   const user = findUserById(users, cookie);
   
   if (!user) {
@@ -218,7 +224,8 @@ app.post("/login", (req, res) => {
   bcrypt.compare(password, user.password)
     .then((result) => {
       if (result) {
-        res.cookie('user_id', user.id);
+        //res.cookie('user_id', user.id);
+        req.session.user_id = user.id;
         res.redirect('/urls');
       } else {
         res.statusCode = 403;
@@ -266,15 +273,19 @@ app.post("/register", (req, res) => {
         email: email, 
         password: hash
         };
-        console.log(users, '<------------');
-        res.cookie('user_id', newId);
+        console.log(users, '<-----reg-------');
+        //res.cookie('user_id', newId);
+        console.log(users[newId].id, '******')
+        req.session.user_id = users[newId].id;
+        console.log('_____reg_______> ', req.session.user_id)
         res.redirect('/urls');
       });
   };
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  //res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
