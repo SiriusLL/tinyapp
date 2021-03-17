@@ -2,6 +2,7 @@ const { request } = require('express');
 const express = require('express');
 const morgan = require('morgan'); //if you want morgan,also 
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs');
 // need to 'npm i morgan in root folder
 const app = express();
 app.use(morgan('dev')); //if you want morgan dev
@@ -208,19 +209,30 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   //const username = req.body && req.body.username ? req.body.username : "";
   const user = findUserByEmail(users, email);
+  console.log(user.password, '<------->>>');
   if (!user) {
     res.statusCode = 403;
     res.send('Incorrect login info, please try again');
     return;
   }
-  if (user.password !== password) {
-    res.statusCode = 403;
-    res.send('Incorrect login info, please try again')
-    return;
-  }
+  bcrypt.compare(password, user.password)
+    .then((result) => {
+      if (result) {
+        res.cookie('user_id', user.id);
+        res.redirect('/urls');
+      } else {
+        res.statusCode = 403;
+        res.send('Incorrect login info, please try again')
+        return;
+      }
+    })
   
-  res.cookie('user_id', user.id);
-  res.redirect('/urls');
+  // if (user.password !== password) {
+    
+  //   return;
+  // }
+  
+  
   
   //if (username.length) {
     //res.redirect(`/urls/${username}`)
@@ -244,9 +256,20 @@ app.post("/register", (req, res) => {
     res.statusCode = 400
     res.send('This email has already been used')
   } else {
-    users[newId] = { id: newId, email: email, password: password };
-    res.cookie('user_id', newId);
-    res.redirect('/urls');
+    
+    bcrypt.genSalt(10)
+      .then((salt) => {
+        return bcrypt.hash(password, salt);
+      })
+      .then((hash) => {
+        users[newId] = { id: newId, 
+        email: email, 
+        password: hash
+        };
+        console.log(users, '<------------');
+        res.cookie('user_id', newId);
+        res.redirect('/urls');
+      });
   };
 });
 
