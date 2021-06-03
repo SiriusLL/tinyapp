@@ -3,22 +3,22 @@ const { assert } = require('chai');
 const { findUserByEmail } = require('../helpers.js');
 
 const testUsers = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+  userRandomID: {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur',
   },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
+  user2RandomID: {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk',
+  },
 };
 
-describe('findUserByEmail', function() {
-  it('should return a user with valid email', function() {
+describe('findUserByEmail', function () {
+  it('should return a user with valid email', function () {
     const user = findUserByEmail(testUsers, 'user@example.com');
-    const expectedOutput = "userRandomID";
+    const expectedOutput = 'userRandomID';
     assert.equal(expectedOutput, user);
   });
   it('should return false when given an invalid user', () => {
@@ -29,5 +29,3 @@ describe('findUserByEmail', function() {
 });
 
 console.log(findUserByEmail(testUsers, 'user@example.com'));
-
-

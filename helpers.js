@@ -10,7 +10,6 @@ const findUserByEmail = (users, email) => {
 const findUserById = (users, id) => {
   for (let userId in users) {
     if (users[userId].id === id) {
-      
       return users[userId].id;
     }
   }
@@ -31,4 +30,9 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2, 8);
 };
 
-module.exports = { findUserByEmail, findUserById, urlsForUser, generateRandomString };
+module.exports = {
+  findUserByEmail,
+  findUserById,
+  urlsForUser,
+  generateRandomString,
+};
